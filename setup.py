@@ -8,7 +8,7 @@ import os
 
 # Read the contents of README file
 def read_file(filename):
-    filepath = os.path.join(os.path.dirname(__file__), 'openocr', filename)
+    filepath = os.path.join(os.path.dirname(__file__), filename)
     if os.path.exists(filepath):
         with open(filepath, encoding='utf-8') as f:
             return f.read()
@@ -16,7 +16,7 @@ def read_file(filename):
 
 # Get version
 def get_version():
-    version_file = os.path.join(os.path.dirname(__file__), 'openocr', '__init__.py')
+    version_file = os.path.join(os.path.dirname(__file__), '__init__.py')
     with open(version_file, 'r', encoding='utf-8') as f:
         for line in f:
             if line.startswith('__version__'):
@@ -36,6 +36,7 @@ setup(
 
     # Package configuration
     packages=find_packages(),
+    py_modules=['openocr'],
     include_package_data=True,
 
     # Python version requirement
@@ -44,7 +45,7 @@ setup(
     # Entry points for command-line scripts
     entry_points={
         'console_scripts': [
-            'openocr=openocr.openocr:main',
+            'openocr=openocr:main',
         ],
     },
 

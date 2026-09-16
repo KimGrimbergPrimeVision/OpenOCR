@@ -79,9 +79,10 @@ Repository = "https://github.com/Topdu/OpenOCR"
 "Bug Reports" = "https://github.com/Topdu/OpenOCR/issues"
 
 [project.scripts]
-openocr = "openocr.openocr:main"
+openocr = "openocr:main"
 
 [tool.setuptools]
+py-modules = ["openocr"]
 packages = {find = {}}
 include-package-data = true
 
