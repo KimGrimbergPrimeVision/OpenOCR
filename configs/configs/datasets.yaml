@@ -1,0 +1,3 @@
+# Optional dataset metadata, not loaded by the OpenOCR training pipeline.
+# Runtime paths are configured in training.yaml and preprocessing.yaml.
+[]

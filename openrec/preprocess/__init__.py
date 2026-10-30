@@ -88,6 +88,7 @@ def transform(data, ops=None):
 
 # 类名到模块的映射
 MODULE_MAPPING = {
+    'NormalizeLabel': '.normalize_text',
     'ABINetLabelEncode': '.abinet_label_encode',
     'ARLabelEncode': '.ar_label_encode',
     'CELabelEncode': '.ce_label_encode',

@@ -1,0 +1,41 @@
+_BASE_:
+  - ../rec/svtrv2/svtrv2_tiny_rctc.yml
+  - preprocessing.yaml
+
+Global:
+  output_dir: ./output/rec/mazda/svtrv2_tiny_rctc/
+  character_dict_path: ./dictionaries/characters.txt
+  max_text_length: 125
+  use_space_char: True
+  pretrained_model:
+  checkpoints:
+  save_res_path: ./output/rec/mazda/predicts.txt
+
+Metric:
+  main_indicator: acc
+  is_filter: False
+  is_lower: False
+  ignore_space: False
+  max_len: 125
+
+Train:
+  dataset:
+    transforms: &transforms
+      - DecodeImagePIL:
+          img_mode: RGB
+      - NormalizeLabel:
+          config_path: ./configs/configs/normalization.yaml
+      - CTCLabelEncode:
+      - RecTVResize:
+      - KeepKeys:
+          keep_keys: ['image', 'label', 'length']
+  loader:
+    batch_size_per_card: 4
+    num_workers: 0
+
+Eval:
+  dataset:
+    transforms: *transforms
+  loader:
+    batch_size_per_card: 4
+    num_workers: 0

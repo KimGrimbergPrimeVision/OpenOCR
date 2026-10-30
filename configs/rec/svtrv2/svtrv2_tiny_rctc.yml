@@ -3,7 +3,7 @@ Global:
   epoch_num: 20
   log_smooth_window: 20
   print_batch_step: 10
-  output_dir: ./output/rec/u14m_filter/svtrv2_tiny_rctc/
+  output_dir: ./output/rec/wikioefen/svtrv2_tiny_rctc/
   save_epoch_step: [15, 1]
   # evaluation is run every 2000 iterations
   eval_epoch_step: [0, 1]
@@ -16,8 +16,8 @@ Global:
   # for data or label process
   character_dict_path: &character_dict_path ./tools/utils/EN_symbol_dict.txt
   max_text_length: &max_text_length 25
-  use_space_char: &use_space_char False
-  save_res_path: ./output/rec/u14m_filter/predicts_svtrv2_rctc.txt
+  use_space_char: &use_space_char True
+  save_res_path: ./output/rec/wikioefen/predicts_svtrv2_rctc.txt
   use_amp: True
 
 Optimizer:
@@ -62,16 +62,11 @@ Metric:
   is_filter: True
 
 Train:
-  dataset:
-    name: RatioDataSetTVResize
-    ds_width: True
-    padding: False
-    data_dir_list: ['../Union14M-L-LMDB-Filtered/filter_train_challenging',
-    '../Union14M-L-LMDB-Filtered/filter_train_hard',
-    '../Union14M-L-LMDB-Filtered/filter_train_medium',
-    '../Union14M-L-LMDB-Filtered/filter_train_normal',
-    '../Union14M-L-LMDB-Filtered/filter_train_easy',
-    ]
+  dataset: 
+    name: SimpleDataSet
+    data_dir: ./Data/mazda_all_clean/
+    label_file_list:
+      - ./Data/mazda_all_clean/train.txt
     transforms:
       - DecodeImagePIL: # load image
           img_mode: RGB
@@ -80,36 +75,23 @@ Train:
           character_dict_path: *character_dict_path
           use_space_char: *use_space_char
           max_text_length: *max_text_length
+      - RecTVResize:
+          image_shape: [32, 320]
+          padding: True
       - KeepKeys:
           keep_keys: ['image', 'label', 'length']
-  sampler:
-    name: RatioSampler
-    scales: [[128, 32]] # w, h
-    # divide_factor: to ensure the width and height dimensions can be devided by downsampling multiple
-    first_bs: &bs 256
-    fix_bs: false
-    divided_factor: [4, 16] # w, h
-    is_training: True
   loader:
     shuffle: True
-    batch_size_per_card: *bs
-    drop_last: True
-    max_ratio: 4
-    num_workers: 4
+    batch_size_per_card: &bs 16
+    drop_last: False
+    num_workers: 0
 
 Eval:
   dataset:
-    name: RatioDataSetTVResize
-    ds_width: True
-    padding: False
-    data_dir_list: [
-      '../evaluation/CUTE80',
-      '../evaluation/IC13_857',
-      '../evaluation/IC15_1811',
-      '../evaluation/IIIT5k',
-      '../evaluation/SVT',
-      '../evaluation/SVTP',
-      ]
+    name: SimpleDataSet
+    data_dir: ./Data/mazda_all_clean/
+    label_file_list:
+      - ./Data/mazda_all_clean/val.txt
     transforms:
       - DecodeImagePIL: # load image
           img_mode: RGB
@@ -117,19 +99,13 @@ Eval:
           character_dict_path: *character_dict_path
           use_space_char: *use_space_char
           max_text_length: *max_text_length
+      - RecTVResize:
+          image_shape: [32, 320]
+          padding: True
       - KeepKeys:
           keep_keys: ['image', 'label', 'length']
-  sampler:
-    name: RatioSampler
-    scales: [[128, 32]] # w, h
-    # divide_factor: to ensure the width and height dimensions can be devided by downsampling multiple
-    first_bs: 256
-    fix_bs: false
-    divided_factor: [4, 16] # w, h
-    is_training: False
   loader:
     shuffle: False
     drop_last: False
     batch_size_per_card: *bs
-    max_ratio: 4
-    num_workers: 4
+    num_workers: 0

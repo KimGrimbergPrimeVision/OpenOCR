@@ -1,0 +1,7 @@
+_BASE_:
+  - training.yaml
+
+Global:
+  pretrained_model: ./output/rec/mazda/svtrv2_tiny_rctc/best.pth
+  checkpoints:
+  infer_img: ./Data/mazda_all_clean/images/

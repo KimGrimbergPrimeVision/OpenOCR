@@ -1,0 +1,11 @@
+Global:
+  image_shape: [32, 1024]
+  padding: True
+
+DataPreparation:
+  input_csv: ./Data/mazda_all_clean/labels.csv
+  output_dir: ./Data/mazda_all_clean/
+  validation_fraction: 0.1
+  test_fraction: 0.1
+  seed: 42
+  extensions: ['.png', '.jpg', '.jpeg', '.tif', '.tiff']

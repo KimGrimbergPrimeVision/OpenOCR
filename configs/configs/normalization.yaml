@@ -1,0 +1,27 @@
+lowercase: true
+normalize_diacritics: true
+preserve_spaces: true
+strip_unknown_characters: false
+
+diacritic_map:
+  ä: a
+  ö: o
+  ü: u
+  é: e
+  è: e
+  ê: e
+  à: a
+  á: a
+  ß: ss
+
+allowed_punctuation:
+  - "."
+  - ","
+  - ":"
+  - ";"
+  - "-"
+  - "/"
+  - "'"
+  - '"'
+  - "("
+  - ")"

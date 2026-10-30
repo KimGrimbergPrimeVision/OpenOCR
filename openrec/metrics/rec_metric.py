@@ -41,6 +41,7 @@ class RecMetric(object):
                  max_ratio=4,
                  **kwargs):
         self.main_indicator = main_indicator
+        self.greater_is_better = kwargs.get('greater_is_better', main_indicator != 'cer')
         self.is_filter = is_filter
         self.is_lower = is_lower
         self.ignore_space = ignore_space
@@ -73,6 +74,8 @@ class RecMetric(object):
         correct_num = 0
         all_num = 0
         norm_edit_dis = 0.0
+        char_errors = 0
+        reference_chars = 0
         for (pred, pred_conf), (target, _) in zip(preds, labels):
             if self.stream:
                 assert len(labels) == 1
@@ -87,14 +90,19 @@ class RecMetric(object):
                 pred = pred.lower()
                 target = target.lower()
             norm_edit_dis += Levenshtein.normalized_distance(pred, target)
+            char_errors += Levenshtein.distance(pred, target)
+            reference_chars += len(target)
             if pred == target:
                 correct_num += 1
             all_num += 1
         self.correct_num += correct_num
         self.all_num += all_num
         self.norm_edit_dis += norm_edit_dis
+        self.char_errors += char_errors
+        self.reference_chars += reference_chars
         return {
             'acc': correct_num / (all_num + self.eps),
+            'cer': char_errors / max(1, reference_chars),
             'norm_edit_dis': 1 - norm_edit_dis / (all_num + self.eps),
         }
 
@@ -110,6 +118,8 @@ class RecMetric(object):
         correct_num_ignore_space_symbol = 0
         all_num = 0
         norm_edit_dis = 0.0
+        char_errors = 0
+        reference_chars = 0
         each_len_num = [0 for _ in range(self.max_len)]
         each_len_correct_num = [0 for _ in range(self.max_len)]
         each_len_norm_edit_dis = [0 for _ in range(self.max_len)]
@@ -145,6 +155,8 @@ class RecMetric(object):
                 pred = pred.lower()
                 target = target.lower()
             dis = Levenshtein.normalized_distance(pred, target)
+            char_errors += Levenshtein.distance(pred, target)
+            reference_chars += len(target)
             norm_edit_dis += dis
             ratio_i = ratio[all_num] - 1 if ratio[
                 all_num] < self.max_ratio else self.max_ratio - 1
@@ -167,6 +179,8 @@ class RecMetric(object):
         self.correct_num_ignore_space_symbol += correct_num_ignore_space_symbol
         self.all_num += all_num
         self.norm_edit_dis += norm_edit_dis
+        self.char_errors += char_errors
+        self.reference_chars += reference_chars
         self.each_len_num = self.each_len_num + np.array(each_len_num)
         self.each_len_correct_num = self.each_len_correct_num + np.array(
             each_len_correct_num)
@@ -179,6 +193,7 @@ class RecMetric(object):
             each_ratio_norm_edit_dis)
         return {
             'acc': correct_num / (all_num + self.eps),
+            'cer': char_errors / max(1, reference_chars),
             'norm_edit_dis': 1 - norm_edit_dis / (all_num + self.eps),
         }
 
@@ -194,9 +209,11 @@ class RecMetric(object):
         acc = 1.0 * self.correct_num / (self.all_num + self.eps)
         norm_edit_dis = 1 - self.norm_edit_dis / (self.all_num + self.eps)
         num_samples = self.all_num
+        cer = self.char_errors / max(1, self.reference_chars)
         self.reset()
         return {
             'acc': acc,
+            'cer': cer,
             'norm_edit_dis': norm_edit_dis,
             'num_samples': num_samples
         }
@@ -231,9 +248,11 @@ class RecMetric(object):
         each_ratio_norm_edit_dis = (1 - ((self.each_ratio_norm_edit_dis) / (
             (self.each_ratio_num) + self.eps))).tolist()
         each_ratio_num = self.each_ratio_num.tolist()
+        cer = self.char_errors / max(1, self.reference_chars)
         self.reset()
         return {
             'acc': acc,
+            'cer': cer,
             'acc_real': acc_real,
             'acc_lower': acc_lower,
             'acc_ignore_space': acc_ignore_space,
@@ -253,6 +272,8 @@ class RecMetric(object):
     def reset(self):
         self.correct_num = 0
         self.all_num = 0
+        self.char_errors = 0
+        self.reference_chars = 0
         self.norm_edit_dis = 0
         self.correct_num_real = 0
         self.correct_num_lower = 0
